@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azka Sehar — Video Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+JP:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0e12;
+    --paper: #f5f0e8;
+    --accent: #c0392b;
+    --accent2: #e67e22;
+    --muted: #6b6b6b;
+    --panel-bg: #ffffff;
+    --border: #1a1a1a;
+    --halftone: rgba(0,0,0,0.04);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #00000008 1px, transparent 1px);
+    background-size: 18px 18px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .manga-border {
+    border: 3px solid var(--border);
+    box-shadow: 5px 5px 0 var(--border);
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--paper);
+    border-bottom: 3px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2.5rem;
+    height: 60px;
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--ink);
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+  }
+
+  nav ul a {
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+
+  nav ul a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 5rem 3rem 3rem 3.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 3px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .speed-lines {
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: repeating-linear-gradient(
+      88deg,
+      transparent,
+      transparent 28px,
+      rgba(0,0,0,0.015) 28px,
+      rgba(0,0,0,0.015) 29px
+    );
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    width: fit-content;
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 8vw, 7.5rem);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-name .outline {
+    -webkit-text-stroke: 2.5px var(--ink);
+    color: transparent;
+  }
+
+  .hero-subtitle {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1rem;
+    color: var(--muted);
+    margin: 1.2rem 0 2rem;
+    line-height: 1.6;
+    max-width: 380px;
+  }
+
+  .hero-subtitle strong { color: var(--accent); font-style: italic; }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border: 3px solid var(--ink);
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    display: inline-block;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--border);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    display: inline-block;
+  }
+
+  .btn-outline:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--border);
+  }
+
+  /* HERO RIGHT — manga panel collage */
+  .hero-right {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-right-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 3rem 3rem;
+    position: relative;
+  }
+
+  .hr-big-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 8vw, 7rem);
+    line-height: 0.88;
+    letter-spacing: 6px;
+    color: rgba(255,255,255,0.06);
+    position: absolute;
+    top: 4rem;
+    right: 2rem;
+    text-align: right;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hr-tags-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hr-tag-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1rem 0;
+  }
+
+  .hr-tag-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    min-width: 2.5rem;
+    opacity: 0.8;
+  }
+
+  .hr-tag-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(245,240,232,0.85);
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+  }
+
+  .hr-tag-label small {
+    display: block;
+    font-size: 0.7rem;
+    color: rgba(245,240,232,0.4);
+    font-weight: 400;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  .hr-divider {
+    height: 1px;
+    background: rgba(245,240,232,0.1);
+    width: 100%;
+  }
+
+  .hr-stats-row {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hr-stat {
+    background: rgba(245,240,232,0.05);
+    border: 1.5px solid rgba(245,240,232,0.12);
+    padding: 12px 18px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .hr-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .hr-stat-label {
+    font-size: 0.58rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.4);
+    margin-top: 4px;
+  }
+
+  /* NOTE SECTION */
+  .note-bar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem 3rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .note-bar .note-icon {
+    font-size: 1.2rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .note-bar p {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.75);
+    max-width: 800px;
+  }
+
+  .note-bar p strong {
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  /* SECTION SHARED */
+  section {
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0.25;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 3px;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  /* ABOUT */
+  #about {
+    padding: 5rem 3.5rem;
+    border-bottom: 3px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .about-text p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #333;
+    margin-bottom: 1.2rem;
+  }
+
+  .about-text p strong { color: var(--accent); }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .skill-card {
+    border: 3px solid var(--border);
+    padding: 1rem 1.2rem;
+    background: var(--panel-bg);
+    position: relative;
+    transition: transform 0.15s;
+  }
+
+  .skill-card::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; right: -5px;
+    width: 100%; height: 100%;
+    border: 3px solid var(--border);
+    z-index: -1;
+    background: var(--border);
+  }
+
+  .skill-card:hover { transform: translate(-2px, -2px); }
+
+  .skill-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-name {
+    font-weight: 500;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .skill-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* WORK / PORTFOLIO */
+  #work {
+    padding: 5rem 3.5rem;
+    border-bottom: 3px solid var(--border);
+  }
+
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .work-card {
+    border: 3px solid var(--border);
+    background: var(--panel-bg);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .work-card::after {
+    content: '';
+    position: absolute;
+    bottom: -6px; right: -6px;
+    width: 100%; height: 100%;
+    border: 3px solid var(--border);
+    background: var(--ink);
+    z-index: -1;
+  }
+
+  .work-card:hover {
+    transform: translate(-3px, -3px);
+  }
+
+  .work-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--border);
+  }
+
+  .work-thumb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 12px,
+      rgba(255,255,255,0.02) 12px,
+      rgba(255,255,255,0.02) 13px
+    );
+  }
+
+  .work-thumb iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  .work-thumb .play-icon {
+    font-size: 2.5rem;
+    color: rgba(255,255,255,0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .work-type-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    text-transform: uppercase;
+    font-weight: 500;
+    z-index: 2;
+  }
+
+  .work-info {
+    padding: 1.2rem;
+  }
+
+  .work-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.4rem;
+  }
+
+  .work-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.8rem;
+  }
+
+  .work-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag {
+    border: 1.5px solid var(--border);
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    color: var(--muted);
+  }
+
+  /* CLIENTS */
+  #clients {
+    padding: 5rem 3.5rem;
+    border-bottom: 3px solid var(--border);
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  #clients .section-title { color: var(--paper); }
+  #clients .section-number { color: var(--accent); opacity: 0.4; }
+
+  .clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+  }
+
+  .client-card {
+    border: 2px solid rgba(245,240,232,0.2);
+    padding: 1.5rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .client-card:hover { border-color: var(--accent); }
+
+  .client-flag {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .client-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    color: var(--paper);
+    margin-bottom: 0.4rem;
+  }
+
+  .client-detail {
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.55);
+    line-height: 1.6;
+  }
+
+  .client-detail strong { color: var(--accent2); }
+
+  .client-link {
+    display: inline-block;
+    margin-top: 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(230,126,34,0.3);
+    padding-bottom: 1px;
+    transition: border-color 0.2s;
+  }
+  .client-link:hover { border-color: var(--accent2); }
+
+  .viral-banner {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    background: var(--accent);
+    border: 3px solid rgba(255,255,255,0.15);
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .viral-banner::before {
+    content: '7.2M';
+    position: absolute;
+    right: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 8rem;
+    color: rgba(255,255,255,0.07);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: -4px;
+  }
+  .viral-left {
+    text-align: center;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255,255,255,0.25);
+    padding-right: 2rem;
+  }
+  .viral-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: white;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+  .viral-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-top: 2px;
+  }
+  .viral-mid { flex: 1; }
+  .viral-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-bottom: 0.4rem;
+    line-height: 1.2;
+  }
+  .viral-sub {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+  }
+  .viral-btn {
+    flex-shrink: 0;
+    background: white;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    text-decoration: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .viral-btn:hover {
+    background: var(--ink);
+    color: white;
+  }
+
+  /* CONTACT */
+  #contact {
+    padding: 5rem 3.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .contact-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 5vw, 5rem);
+    letter-spacing: 3px;
+    line-height: 0.95;
+    color: var(--ink);
+    margin-bottom: 1.2rem;
+  }
+
+  .contact-heading span { color: var(--accent); }
+
+  .contact-sub {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 340px;
+    margin-bottom: 2rem;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.2rem;
+    border: 2px solid var(--border);
+    background: var(--panel-bg);
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .contact-item:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateX(5px);
+  }
+
+  .contact-item .ci-icon { font-size: 1.1rem; }
+
+  .contact-form-panel {
+    border: 3px solid var(--border);
+    padding: 2.5rem;
+    background: var(--panel-bg);
+    position: relative;
+  }
+
+  .contact-form-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -7px; right: -7px;
+    width: 100%; height: 100%;
+    border: 3px solid var(--border);
+    background: var(--ink);
+    z-index: -1;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+
+  .form-input {
+    width: 100%;
+    border: 2px solid var(--border);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  textarea.form-input { resize: vertical; min-height: 100px; }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    color: rgba(245,240,232,0.4);
+    padding: 1.5rem 3.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border-top: 3px solid var(--border);
+  }
+
+  footer .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: var(--paper);
+  }
+
+  footer .footer-logo span { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-left > * {
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .hero-left > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero-left > *:nth-child(2) { animation-delay: 0.2s; }
+  .hero-left > *:nth-child(3) { animation-delay: 0.3s; }
+  .hero-left > *:nth-child(4) { animation-delay: 0.4s; }
+
+  /* DIVIDER */
+  .chapter-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 3.5rem;
+    background: var(--accent);
+    color: white;
+    height: 38px;
+  }
+
+  .chapter-divider span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 4px;
+  }
+
+  .chapter-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  @media (max-width: 768px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    #about { grid-template-columns: 1fr; }
+    #contact { grid-template-columns: 1fr; }
+    nav ul { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">AZKA<span>.</span></div>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#clients">Clients</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="speed-lines"></div>
+    <div class="hero-tag">✦ Video Editor & Motion Artist</div>
+    <div class="hero-name">
+      AZKA<br><span class="outline">SEHAR</span>
+    </div>
+    <p class="hero-subtitle">
+      Crafting <strong>cinematic manga edits</strong>, animating 2D panels in After Effects, and producing short-form content that stops the scroll — one frame at a time.
+    </p>
+    <div class="hero-cta">
+      <a href="#work" class="btn-primary">View My Work</a>
+      <a href="#contact" class="btn-outline">Hire Me</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-right-inner">
+      <div class="hr-big-text">FRAME<br>BY<br>FRAME</div>
+      <div class="hr-tags-col">
+        <div class="hr-tag-item">
+          <span class="hr-tag-num">01</span>
+          <span class="hr-tag-label">After Effects<br><small>2D Panel Animation</small></span>
+        </div>
+        <div class="hr-divider"></div>
+        <div class="hr-tag-item">
+          <span class="hr-tag-num">02</span>
+          <span class="hr-tag-label">Manga Edits<br><small>Motion Comics</small></span>
+        </div>
+        <div class="hr-divider"></div>
+        <div class="hr-tag-item">
+          <span class="hr-tag-num">03</span>
+          <span class="hr-tag-label">Short-Form<br><small>YouTube · Reels · Shorts</small></span>
+        </div>
+        <div class="hr-divider"></div>
+        <div class="hr-tag-item">
+          <span class="hr-tag-num">04</span>
+          <span class="hr-tag-label">Client Work<br><small>DE · Multi-Channel</small></span>
+        </div>
+      </div>
+      <div class="hr-stats-row">
+        <div class="hr-stat">
+          <div class="hr-stat-num">5</div>
+          <div class="hr-stat-label">Active Channels</div>
+        </div>
+        <div class="hr-stat">
+          <div class="hr-stat-num">2+</div>
+          <div class="hr-stat-label">Intl. Clients</div>
+        </div>
+        <div class="hr-stat">
+          <div class="hr-stat-num">AE</div>
+          <div class="hr-stat-label">Specialist</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOTE BAR -->
+<div class="note-bar">
+  <span class="note-icon">⚠</span>
+  <p>
+    <strong>A quick note before you scroll:</strong> Some of the personal projects shown below were made for self-practice — they may look a little unhinged. That's intentional. They exist to demonstrate technical skill in After Effects, motion graphics, and 2D manga panel animation — not the content itself. Client work is clearly labelled and tells a different story.
+  </p>
+</div>
+
+<!-- CHAPTER 1 -->
+<div class="chapter-divider">
+  <span>◆ CHAPTER 01 — WHO I AM</span>
+  <div class="chapter-line"></div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div>
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">ABOUT ME</h2>
+    </div>
+    <div class="about-text">
+      <p>I'm <strong>Azka Sehar</strong> — a video editor and motion artist specialising in anime/manga aesthetics, After Effects animation, and high-impact short-form content.</p>
+      <p>I animate <strong>2D manga panels in After Effects</strong> — bringing still frames to life with parallax depth, kinetic typography, and cinematic sound design. It's a niche craft, and I've made it my signature.</p>
+      <p>Currently managing content for <strong>5 active YouTube channels</strong> simultaneously, and have delivered professional work for an international client based in <strong>Germany</strong>. I move fast, I communicate clearly, and the quality speaks for itself.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-header" style="margin-bottom: 1.5rem;">
+      <span class="section-number" style="font-size: 2.5rem;">✦</span>
+      <h2 class="section-title" style="font-size: 1.8rem;">SKILLS</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🎬</div>
+        <div class="skill-name">After Effects</div>
+        <div class="skill-desc">2D manga panel animation, motion FX, parallax depth, kinetic typography</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">✏️</div>
+        <div class="skill-name">Manga Edits</div>
+        <div class="skill-desc">Panel animation, speed lines, halftone, sound-sync storytelling</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📱</div>
+        <div class="skill-name">Short-Form Video</div>
+        <div class="skill-desc">Reels, Shorts & TikToks — built to stop the scroll</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎵</div>
+        <div class="skill-name">Sound Design</div>
+        <div class="skill-desc">Beat-synced cuts, SFX layering, mood-driven audio</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-name">Premiere Pro</div>
+        <div class="skill-desc">Multi-channel pipeline, fast turnaround, color grading</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-name">Client Work</div>
+        <div class="skill-desc">International experience — German market, multi-channel management</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 2 -->
+<div class="chapter-divider">
+  <span>◆ CHAPTER 02 — THE WORK</span>
+  <div class="chapter-line"></div>
+</div>
+
+<!-- WORK -->
+<section id="work">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2 class="section-title">PORTFOLIO</h2>
+  </div>
+
+  <div class="work-grid">
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/1zu_euYY3AKT8-iJu00g8_8os6ce0Hiak/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 01</div>
+        <div class="work-desc">Personal project — made to push technical limits in After Effects. Ignore the content, watch the craft.</div>
+        <div class="work-tags">
+          <span class="tag">After Effects</span>
+          <span class="tag">Personal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/16PcC8qTGTtymcRcRYTzOVYgF0JUDG-0_/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 02</div>
+        <div class="work-desc">Motion + sound sync experiment. Showcases beat-driven editing and visual flow.</div>
+        <div class="work-tags">
+          <span class="tag">Motion</span>
+          <span class="tag">Sound Sync</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/1goXhAj4qssr4-6xZ9kDHV8zqwlDjqroF/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 03</div>
+        <div class="work-desc">AE animation exploration — panels, transitions, and cinematic energy.</div>
+        <div class="work-tags">
+          <span class="tag">After Effects</span>
+          <span class="tag">Manga Edit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/1Ydj7tr8MBWtb5d6IuFkOs2RwK6xYRhjp/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 04</div>
+        <div class="work-desc">Stylised short-form edit — pacing, cuts, and visual storytelling.</div>
+        <div class="work-tags">
+          <span class="tag">Short Form</span>
+          <span class="tag">Editing</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/12C3QSqloowJ60jm_PpnyPRz-RJDHPIDJ/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 05</div>
+        <div class="work-desc">Kinetic typography and panel animation — demonstrating full AE skillset.</div>
+        <div class="work-tags">
+          <span class="tag">Typography</span>
+          <span class="tag">After Effects</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/11Erp63VUoe7eN9AlNSXDUQlABBlmDtve/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 06</div>
+        <div class="work-desc">High-energy edit showcasing speed, rhythm, and visual impact.</div>
+        <div class="work-tags">
+          <span class="tag">Motion FX</span>
+          <span class="tag">Manga Edit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/1NCiaHf8-4CG7p_WmEJCQH_Q3rV-gkZqZ/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 07</div>
+        <div class="work-desc">Atmosphere-heavy edit — mood, color, and cinematic composition.</div>
+        <div class="work-tags">
+          <span class="tag">Color Grade</span>
+          <span class="tag">Cinematic</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-card">
+      <div class="work-thumb">
+        <div class="work-type-badge">Personal Work</div>
+        <iframe src="https://drive.google.com/file/d/1qaxnT0-L_JOaEP-AN-A8SfBE10bWO3sV/preview" allowfullscreen allow="autoplay"></iframe>
+      </div>
+      <div class="work-info">
+        <div class="work-title">EDIT 08</div>
+        <div class="work-desc">Final personal piece — full showcase of editing style and technical range.</div>
+        <div class="work-tags">
+          <span class="tag">After Effects</span>
+          <span class="tag">Full Edit</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <a href="https://drive.google.com/drive/folders/1i8kBOjYMUiQ6EJWcmyV2gQZ8Kh5ehgGB?usp=sharing" target="_blank" class="btn-primary">
+      ▶ &nbsp; VIEW FULL WORK FOLDER ON DRIVE
+    </a>
+  </div>
+</section>
+
+<!-- CHAPTER 3 -->
+<div class="chapter-divider">
+  <span>◆ CHAPTER 03 — CLIENT RECORD</span>
+  <div class="chapter-line"></div>
+</div>
+
+<!-- CLIENTS -->
+<section id="clients">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2 class="section-title">CLIENTS & EXPERIENCE</h2>
+  </div>
+
+  <!-- VIRAL HIGHLIGHT -->
+  <div class="viral-banner">
+    <div class="viral-left">
+      <div class="viral-num">7.2M</div>
+      <div class="viral-label">VIEWS</div>
+    </div>
+    <div class="viral-mid">
+      <div class="viral-title">RANKING FUNNIEST FAN INTERACTIONS WITH WWE SUPERSTARS</div>
+      <div class="viral-sub">One short. Seven point two million views. That's not luck — that's editing that hooks.</div>
+    </div>
+    <a href="https://www.youtube.com/shorts/BqfXQdgVCkY" target="_blank" class="viral-btn">WATCH ↗</a>
+  </div>
+
+  <div class="clients-grid">
+    <div class="client-card">
+      <div class="client-flag">🇩🇪</div>
+      <div class="client-name">BROFESSOR STEIN</div>
+      <div class="client-detail">Video editing for a <strong>German YouTube channel</strong>. Delivered consistent, professional content on schedule — fully remote, zero micromanagement needed.</div>
+      <a href="https://www.youtube.com/@BrofessorStein" target="_blank" class="client-link">Visit Channel ↗</a>
+    </div>
+    <div class="client-card">
+      <div class="client-flag">🎢</div>
+      <div class="client-name">CRINGE COASTER</div>
+      <div class="client-detail">Short-form and long-form content editing. Channel-specific style, consistent output, audience-aware pacing.</div>
+      <a href="https://www.youtube.com/@CringeCoaster/featured" target="_blank" class="client-link">Visit Channel ↗</a>
+    </div>
+    <div class="client-card">
+      <div class="client-flag">🔥</div>
+      <div class="client-name">FLAME FRAME</div>
+      <div class="client-detail">Dynamic edits with high visual energy. Beat-synced cuts and motion-heavy storytelling.</div>
+      <a href="https://www.youtube.com/@FlameFrame001" target="_blank" class="client-link">Visit Channel ↗</a>
+    </div>
+    <div class="client-card">
+      <div class="client-flag">💡</div>
+      <div class="client-name">PULSE IN PIXELS</div>
+      <div class="client-detail">Clean, engaging content with polished post-production. Built for retention and watch-time.</div>
+      <a href="https://www.youtube.com/@pulseinpixels" target="_blank" class="client-link">Visit Channel ↗</a>
+    </div>
+    <div class="client-card">
+      <div class="client-flag">🎌</div>
+      <div class="client-name">ANIME / MANGA EDITS</div>
+      <div class="client-detail">Specialist in <strong>2D manga panel animation</strong> using After Effects. Motion comics, parallax panels, beat-synced storytelling — a niche most editors can't touch.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 4 -->
+<div class="chapter-divider">
+  <span>◆ CHAPTER 04 — LET'S WORK</span>
+  <div class="chapter-line"></div>
+</div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div>
+    <div class="contact-heading">
+      READY TO<br><span>WORK</span><br>TOGETHER?
+    </div>
+    <p class="contact-sub">
+      I'm open to freelance projects, long-term collaborations, and full-time roles. Fast communication, deadline-committed, and genuinely passionate about the craft.
+    </p>
+    <div class="contact-links">
+      <a href="https://drive.google.com/drive/folders/1i8kBOjYMUiQ6EJWcmyV2gQZ8Kh5ehgGB?usp=sharing" target="_blank" class="contact-item">
+        <span class="ci-icon">📁</span>
+        <span>View Full Work on Google Drive</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="contact-form-panel">
+    <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 2px; margin-bottom: 1.5rem;">SEND A MESSAGE</h3>
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input type="text" class="form-input" placeholder="e.g. Hiroshi Tanaka">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" placeholder="your@email.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Project Type</label>
+      <input type="text" class="form-input" placeholder="e.g. Manga Edit, YouTube Channel, Short-Form">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-input" placeholder="Tell me about the project..."></textarea>
+    </div>
+    <button class="btn-primary" style="width: 100%;">SEND MESSAGE ✦</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">AZKA<span>.</span>SEHAR</div>
+  <div>Video Editor · After Effects Specialist · 2D Manga Animation</div>
+  <div>© 2025 All rights reserved</div>
+</footer>
+
+</body>
+</html>
